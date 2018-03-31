@@ -1,2 +1,2 @@
 # OpenWebNet
-Python Class for interaction with OpenWebNet bus
+TEST Python Class for interaction with OpenWebNet bus
