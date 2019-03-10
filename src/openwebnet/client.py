@@ -21,7 +21,7 @@ class OpenWebNet(object):
     def __init__(self,host,port,password):
         self._host = host
         self._port = int(port)
-        self._psw = password
+        self._password = password
         self._session = False
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -40,7 +40,7 @@ class OpenWebNet(object):
         return str(self._socket.recv(1024).decode())
 
 #Calculate the password to start operation
-    def calculated_psw (self, nonce):
+    def calculated_password (self, nonce):
         m_1 = 0xFFFFFFFF
         m_8 = 0xFFFFFFF8
         m_16 = 0xFFFFFFF0
@@ -49,7 +49,7 @@ class OpenWebNet(object):
         flag = True
         num1 = 0
         num2 = 0
-        self._psw = int(self._psw)
+        self._password = int(self._password)
 
         for c in nonce:
             num1 = num1 & m_1
@@ -57,7 +57,7 @@ class OpenWebNet(object):
             if c == '1':
                 length = not flag
                 if not length:
-                    num2 = self._psw
+                    num2 = self._password
                 num1 = num2 & m_128
                 num1 = num1 >> 7
                 num2 = num2 << 25
@@ -66,7 +66,7 @@ class OpenWebNet(object):
             elif c == '2':
                 length = not flag
                 if not length:
-                    num2 = self._psw
+                    num2 = self._password
                 num1 = num2 & m_16
                 num1 = num1 >> 4
                 num2 = num2 << 28
@@ -75,7 +75,7 @@ class OpenWebNet(object):
             elif c == '3':
                 length = not flag
                 if not length:
-                    num2 = self._psw
+                    num2 = self._password
                 num1 = num2 & m_8
                 num1 = num1 >> 3
                 num2 = num2 << 29
@@ -85,7 +85,7 @@ class OpenWebNet(object):
                 length = not flag
 
                 if not length:
-                    num2 = self._psw
+                    num2 = self._password
                 num1 = num2 << 1
                 num2 = num2 >> 31
                 num1 = num1 + num2
@@ -93,7 +93,7 @@ class OpenWebNet(object):
             elif c == '5':
                 length = not flag
                 if not length:
-                    num2 = self._psw
+                    num2 = self._password
                 num1 = num2 << 5
                 num2 = num2 >> 27
                 num1 = num1 + num2
@@ -101,7 +101,7 @@ class OpenWebNet(object):
             elif c == '6':
                 length = not flag
                 if not length:
-                    num2 = self._psw
+                    num2 = self._password
                 num1 = num2 << 12
                 num2 = num2 >> 20
                 num1 = num1 + num2
@@ -109,7 +109,7 @@ class OpenWebNet(object):
             elif c == '7':
                 length = not flag
                 if not length:
-                    num2 = self._psw
+                    num2 = self._password
                 num1 = num2 & 0xFF00
                 num1 = num1 + (( num2 & 0xFF ) << 24 )
                 num1 = num1 + (( num2 & 0xFF0000 ) >> 16 )
@@ -119,7 +119,7 @@ class OpenWebNet(object):
             elif c == '8':
                 length = not flag
                 if not length:
-                    num2 = self._psw
+                    num2 = self._password
                 num1 = num2 & 0xFFFF
                 num1 = num1 << 16
                 num1 = num1 + ( num2 >> 24 )
@@ -130,7 +130,7 @@ class OpenWebNet(object):
             elif c == '9':
                 length = not flag
                 if not length:
-                    num2 = self._psw
+                    num2 = self._password
                 num1 = ~num2
                 flag = False
             else:
@@ -157,7 +157,7 @@ class OpenWebNet(object):
             return False
 
         #calculate the psw
-        psw_open = '*#' + str(self.calculated_psw(answer)) + '##'
+        psw_open = '*#' + str(self.calculated_password(answer)) + '##'
 
         #send the password
         self.send_data(psw_open)
