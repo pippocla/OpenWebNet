@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
+from openwebnet import messages
+from openwebnet.client import OpenWebNet
 from pkg_resources import get_distribution, DistributionNotFound
 
-from openwebnet.client import OpenWebNet
-
-__all__=[OpenWebNet]
+__all__=[OpenWebNet, messages]
 
 try:
     # Change here if project is renamed and does not equal the package name
