@@ -1,4 +1,4 @@
-def calculate_password(self, nonce):
+def calculate_password(password, nonce):
     m_1 = 0xFFFFFFFF
     m_8 = 0xFFFFFFF8
     m_16 = 0xFFFFFFF0
@@ -7,7 +7,7 @@ def calculate_password(self, nonce):
     flag = True
     num1 = 0
     num2 = 0
-    self._password = int(self._password)
+    password = int(password)
 
     for c in nonce:
         num1 = num1 & m_1
@@ -15,7 +15,7 @@ def calculate_password(self, nonce):
         if c == '1':
             length = not flag
             if not length:
-                num2 = self._password
+                num2 = password
             num1 = num2 & m_128
             num1 = num1 >> 7
             num2 = num2 << 25
@@ -24,7 +24,7 @@ def calculate_password(self, nonce):
         elif c == '2':
             length = not flag
             if not length:
-                num2 = self._password
+                num2 = password
             num1 = num2 & m_16
             num1 = num1 >> 4
             num2 = num2 << 28
@@ -33,7 +33,7 @@ def calculate_password(self, nonce):
         elif c == '3':
             length = not flag
             if not length:
-                num2 = self._password
+                num2 = password
             num1 = num2 & m_8
             num1 = num1 >> 3
             num2 = num2 << 29
@@ -43,7 +43,7 @@ def calculate_password(self, nonce):
             length = not flag
 
             if not length:
-                num2 = self._password
+                num2 = password
             num1 = num2 << 1
             num2 = num2 >> 31
             num1 = num1 + num2
@@ -51,7 +51,7 @@ def calculate_password(self, nonce):
         elif c == '5':
             length = not flag
             if not length:
-                num2 = self._password
+                num2 = password
             num1 = num2 << 5
             num2 = num2 >> 27
             num1 = num1 + num2
@@ -59,7 +59,7 @@ def calculate_password(self, nonce):
         elif c == '6':
             length = not flag
             if not length:
-                num2 = self._password
+                num2 = password
             num1 = num2 << 12
             num2 = num2 >> 20
             num1 = num1 + num2
@@ -67,7 +67,7 @@ def calculate_password(self, nonce):
         elif c == '7':
             length = not flag
             if not length:
-                num2 = self._password
+                num2 = password
             num1 = num2 & 0xFF00
             num1 = num1 + ((num2 & 0xFF) << 24)
             num1 = num1 + ((num2 & 0xFF0000) >> 16)
@@ -77,7 +77,7 @@ def calculate_password(self, nonce):
         elif c == '8':
             length = not flag
             if not length:
-                num2 = self._password
+                num2 = password
             num1 = num2 & 0xFFFF
             num1 = num1 << 16
             num1 = num1 + (num2 >> 24)
@@ -88,7 +88,7 @@ def calculate_password(self, nonce):
         elif c == '9':
             length = not flag
             if not length:
-                num2 = self._password
+                num2 = password
             num1 = ~num2
             flag = False
         else:
