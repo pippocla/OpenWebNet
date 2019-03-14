@@ -4,8 +4,8 @@
 import pytest
 from openwebnet import OpenWebNet
 
-__author__ = "Karel Vervaeke"
-__copyright__ = "Karel Vervaeke"
+__author__ = "Pippocla"
+__copyright__ = "Pippocla"
 __license__ = "mit"
 
 
