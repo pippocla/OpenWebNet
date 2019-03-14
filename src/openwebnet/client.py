@@ -46,7 +46,7 @@ class OpenWebNet:
             self._session = True
 
     def send_password(self, nonce):
-        psw_open = '*#' + str(calculate_password(self._password, answer)) + '##'
+        psw_open = '*#' + str(calculate_password(self._password, nonce)) + '##'
         self.send_data(psw_open)
 
     def extract_values(self, answer):
