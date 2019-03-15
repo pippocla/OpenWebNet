@@ -17,16 +17,28 @@ class OpenWebNet:
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def connect(self):
-        self._socket.connect((self._host, self._port))
+        print("connecting with",self._host, self._port)
+        try:
+            self._socket.connect((self._host, self._port))
+            return True
+        except IOError:
+            _LOGGER.exception("Could not connect")
+            self._socket.close()
+            return False
 
     def send_data(self, data):
         self._socket.send(data.encode())
+        print("--->", data)
 
     def read_data(self):
-        return str(self._socket.recv(1024).decode())
+        data = str(self._socket.recv(1024).decode())
+        print("<---", data)
+        return data
 
     def cmd_session(self):
-        self.connect()
+        connected = self.connect()
+        if not connected:
+            return
 
         if self.read_data() == messages.NACK:
             _LOGGER.exception("Could not initialize connection with the gateway")
@@ -105,7 +117,9 @@ class OpenWebNet:
         if message[len(message) - 6:] == messages.NACK:
             return None
         else:
-            return self.extract_values(check_message[:len(check_message) - 6])
+            extracted = self.extract_values(check_message[:len(check_message) - 6])
+            print("extracted", extracted)
+            return extracted
 
     def dimension_read_request(self, who, where, dimension):
         if not self._session:
@@ -154,3 +168,4 @@ class OpenWebNet:
             return 'OFF'
         else:
             return 'ON'
+
