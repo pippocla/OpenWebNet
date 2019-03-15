@@ -1,6 +1,7 @@
 # OpenWebNet
 
-Python client for interaction with OpenWebNet bus
+Python client for interaction with OpenWebNet bus.
+There's a synchronous client for command sessions and an asynchronous client for event sessions.
 
 ## Example usage:
 
