@@ -115,13 +115,13 @@ class CommandClient:
             response = self.read_response_values()
             attempts_left=3
             while response[2] != where and attempts_left > 0:
-                logger.debug("asked for status of %s, but got status of %s, trying again"%(where, response[2]))
+                _LOGGER.debug("asked for status of %s, but got status of %s, trying again"%(where, response[2]))
                 self.send_data(request)
                 response = self.read_response_values()
                 attempts_left -= 1
 
             if response[2] != where:
-                logger.warn("Oh-oh, did not get desired response after 3 tries:", where, response)
+                _LOGGER.warn("Oh-oh, did not get desired response after 3 tries:", where, response)
                 return False
             return response[1] == '1'
 
@@ -161,12 +161,6 @@ class CommandClient:
 
     def light_status(self, where):
         state = self.request_state('1', where)
-
-        #if state[1] == '1':
-        #    return True
-        #else:
-        #    return False
-
         return state
 
     def read_temperature(self, where):
