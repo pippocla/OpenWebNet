@@ -1,3 +1,6 @@
+# Avoid accidental commit of real credentials
+openwebnet_config.yml
+
 # Temporary and binary files
 *~
 *.py[cod]

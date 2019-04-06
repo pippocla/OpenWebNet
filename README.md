@@ -5,10 +5,14 @@ There's a synchronous client for command sessions and an asynchronous client for
 
 ## Example usage:
 
-```
-from openwebnet import OpenWebNet
+### CommandClient
 
-client = OpenWebNet('192.168.1.10', 20000, '951753')
+The CommandClient connects to the gateway and establishes a comand session.
+The CommandClient works synchronously.
 
-client.light_on('11')
-```
+See examples/commandclient.py
+
+### EventClient
+
+The EventClient connects to the gateway and establishes an event session.
+The EventClient works asynchronously

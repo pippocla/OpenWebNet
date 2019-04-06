@@ -1,23 +1,24 @@
 # -*- coding: utf-8 -*-
 import socket
 from logging import getLogger
+import threading
 
 from openwebnet import messages
 from openwebnet.password import calculate_password
 
 _LOGGER = getLogger(__name__)
 
-
-class OpenWebNet:
+class CommandClient:
     def __init__(self, host, port, password):
         self._host = host
         self._port = int(port)
         self._password = password
         self._session = False
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self._lock = threading.Lock()
 
     def connect(self):
-        print("connecting with",self._host, self._port)
+        _LOGGER.info("connecting with %s:%s",self._host, self._port)
         try:
             self._socket.connect((self._host, self._port))
             return True
@@ -27,12 +28,12 @@ class OpenWebNet:
             return False
 
     def send_data(self, data):
+        _LOGGER.debug("---> %s", data)
         self._socket.send(data.encode())
-        print("--->", data)
 
     def read_data(self):
         data = str(self._socket.recv(1024).decode())
-        print("<---", data)
+        _LOGGER.debug("<--- %s", data)
         return data
 
     def cmd_session(self):
@@ -92,24 +93,37 @@ class OpenWebNet:
         return message
 
     def normal_request(self, who, where, what):
-        if not self._session:
-            self.cmd_session()
+        with self._lock:
+            if not self._session:
+                self.cmd_session()
 
-        normal_request = '*' + who + '*' + what + '*' + where + '##'
-        self.send_data(normal_request)
+            normal_request = '*' + who + '*' + what + '*' + where + '##'
+            self.send_data(normal_request)
 
-        message = self.read_data()
-        if message == messages.NACK:
-            _LOGGER.exception("Error: command execution failed")
+            message = self.read_data()
+            if message == messages.NACK:
+                _LOGGER.exception("Error: command execution failed")
 
     def request_state(self, who, where):
-        if not self._session:
-            self.cmd_session()
+        with self._lock:
+            if not self._session:
+                self.cmd_session()
 
-        stato_request = '*#' + who + '*' + where + '##'
-        self.send_data(stato_request)
+            request = '*#' + who + '*' + where + '##'
 
-        return self.read_response_values()
+            self.send_data(request)
+            response = self.read_response_values()
+            attempts_left=3
+            while response[2] != where and attempts_left > 0:
+                logger.debug("asked for status of %s, but got status of %s, trying again"%(where, response[2]))
+                self.send_data(request)
+                response = self.read_response_values()
+                attempts_left -= 1
+
+            if response[2] != where:
+                logger.warn("Oh-oh, did not get desired response after 3 tries:", where, response)
+                return False
+            return response[1] == '1'
 
     def read_response_values(self):
         message = self.read_data()
@@ -118,7 +132,6 @@ class OpenWebNet:
             return None
         else:
             extracted = self.extract_values(check_message[:len(check_message) - 6])
-            print("extracted", extracted)
             return extracted
 
     def dimension_read_request(self, who, where, dimension):
@@ -149,10 +162,12 @@ class OpenWebNet:
     def light_status(self, where):
         state = self.request_state('1', where)
 
-        if state[1] == '1':
-            return True
-        else:
-            return False
+        #if state[1] == '1':
+        #    return True
+        #else:
+        #    return False
+
+        return state
 
     def read_temperature(self, where):
         temperature = self.dimension_read_request('4', where, '0')
