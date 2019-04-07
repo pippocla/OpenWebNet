@@ -122,8 +122,8 @@ class CommandClient:
 
             if response[2] != where:
                 _LOGGER.warn("Oh-oh, did not get desired response after 3 tries:", where, response)
-                return False
-            return response[1] == '1'
+                return None
+            return response[1]
 
     def read_response_values(self):
         message = self.read_data()
@@ -153,15 +153,17 @@ class CommandClient:
 
         return self.read_data()
 
+    def light_command(self, where, what):
+        self.normal_request('1', str(where), str(what))
+
     def light_on(self, where):
-        self.normal_request('1', where, '1')
+        self.light_command(where, 1)
 
     def light_off(self, where):
-        self.normal_request('1', where, '0')
+        self.light_command(where, 0)
 
     def light_status(self, where):
-        state = self.request_state('1', where)
-        return state
+        return self.request_state('1', where)
 
     def read_temperature(self, where):
         temperature = self.dimension_read_request('4', where, '0')
