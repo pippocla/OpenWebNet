@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from openwebnet.messages import extract_messages
-from openwebnet import messages
+from reopenwebnet.messages import extract_messages
+from reopenwebnet import messages
 
 
 def test_extract_messages_nack():

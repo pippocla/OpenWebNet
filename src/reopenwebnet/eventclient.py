@@ -5,9 +5,9 @@ from logging import getLogger
 
 import threading
 
-from openwebnet import messages
-from openwebnet.password import calculate_password
-from openwebnet.dispatcher import OpenWebNetEventDispatcher
+from reopenwebnet import messages
+from reopenwebnet.password import calculate_password
+from reopenwebnet.dispatcher import OpenWebNetEventDispatcher
 
 _LOGGER = getLogger(__name__)
 

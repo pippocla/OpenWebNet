@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from openwebnet import messages
-from openwebnet.client import CommandClient
-from openwebnet.eventclient import EventClient
+from reopenwebnet import messages
+from reopenwebnet.client import CommandClient
+from reopenwebnet.eventclient import EventClient
 from pkg_resources import get_distribution, DistributionNotFound
 
 __all__=[CommandClient, EventClient, messages]

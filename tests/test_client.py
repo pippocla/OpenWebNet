@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-from openwebnet import CommandClient
+from reopenwebnet import CommandClient
 
 __author__ = "Pippocla"
 __copyright__ = "Pippocla"

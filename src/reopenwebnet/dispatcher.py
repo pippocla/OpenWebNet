@@ -5,7 +5,7 @@ from logging import getLogger
 
 _LOGGER = getLogger(__name__)
 
-from openwebnet import messages
+from reopenwebnet import messages
 
 class OpenWebNetEventDispatcher(asyncore.dispatcher):
     def __init__(self, host, port, event_listener):

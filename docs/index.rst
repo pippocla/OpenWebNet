@@ -1,8 +1,6 @@
-==========
-openwebnet
-==========
+# reopenwebnet
 
-This is the documentation of **openwebnet**.
+This is the documentation of **reopenwebnet**.
 
 .. note::
 
