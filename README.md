@@ -3,6 +3,8 @@
 Python client for interaction with ReOpenWebNet bus.
 There's a synchronous client for command sessions and an asynchronous client for event sessions.
 
+This is a fork from https://github.com/pippocla/openwebnet (I felt there were some shortcomings in the original project & I could not easily reach the owner to share my changes)
+
 ## Example usage:
 
 ### CommandClient
