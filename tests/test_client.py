@@ -4,8 +4,8 @@
 import pytest
 from reopenwebnet import CommandClient
 
-__author__ = "Pippocla"
-__copyright__ = "Pippocla"
+__author__ = "karel1980"
+__copyright__ = "karel1980"
 __license__ = "mit"
 
 

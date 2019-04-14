@@ -82,7 +82,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'reopenwebnet'
-copyright = u'2019, Pippocla'
+copyright = u'2019, karel1980'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
