@@ -15,10 +15,11 @@ class CommandClient:
         self._password = password
         self._session = False
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self._socket.settimeout(3.0)
         self._lock = threading.Lock()
 
     def connect(self):
-        _LOGGER.info("connecting with %s:%s",self._host, self._port)
+        _LOGGER.debug("connecting with %s:%s",self._host, self._port)
         try:
             self._socket.connect((self._host, self._port))
             return True
@@ -93,6 +94,7 @@ class CommandClient:
         return message
 
     def normal_request(self, who, where, what):
+        who,where,what = str(who),str(where),str(what)
         with self._lock:
             if not self._session:
                 self.cmd_session()
@@ -105,6 +107,7 @@ class CommandClient:
                 _LOGGER.exception("Error: command execution failed")
 
     def request_state(self, who, where):
+        who,where = str(who),str(where)
         with self._lock:
             if not self._session:
                 self.cmd_session()
