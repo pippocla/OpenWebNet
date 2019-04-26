@@ -18,3 +18,9 @@ See examples/commandclient.py
 
 The EventClient connects to the gateway and establishes an event session.
 The EventClient works asynchronously
+
+## Releasing
+
+git tag x.y.z
+python setup.py build
+twine upload dist/reopenwebnet-x.y.z-py2.py3-none-any.whl
