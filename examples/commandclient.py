@@ -9,6 +9,8 @@ KITCHEN_LIGHT = '13'
 def main():
     client = get_command_client()
 
+    print_status_all_lights(client)
+
     print_light_status(client, KITCHEN_LIGHT)
     sleep(3)
 
@@ -18,6 +20,11 @@ def main():
 
     turn_off(client, KITCHEN_LIGHT)
     print_light_status(client, KITCHEN_LIGHT)
+
+
+def print_status_all_lights(client):
+    print("Fetching status of all lights with 1 command")
+    print(client.request_state_multi('1', '0'))
 
 def turn_off(client, where):
     print("Sending light off command")
@@ -30,10 +37,12 @@ def turn_on(client, where):
 def print_light_status(client, where):
     status = client.light_status(where)
 
-    if status:
+    if status == '1':
         print("Light is currently on")
-    else:
+    elif status == '0':
         print("Light is currently off")
+    else:
+        print("Light status = ", status)
 
 if __name__ == '__main__':
     main()
