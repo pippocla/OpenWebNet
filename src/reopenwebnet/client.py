@@ -21,8 +21,7 @@ class CommandClient:
         self._port = int(port)
         self._password = password
         self._session = False
-        self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self._socket.settimeout(timeout)
+        self._timeout = timeout
         self._lock = threading.Lock()
 
     def normal_request(self, who, where, what):
@@ -80,9 +79,13 @@ class CommandClient:
             try:
                 if not self._session:
                     self.cmd_session() 
+
+                if not self._session:
+                    return None
+                _LOGGER.debug('about to send request')
                 self.send_data(request)
                 response = self._read_complete_response() 
-            except IOError:
+            except (IOError, OSError, socket.timeout) as e:
                 self._session = False 
                 self._socket.close()
 
@@ -98,8 +101,10 @@ class CommandClient:
     def cmd_session(self):
         connected = self.connect()
         if not connected:
+            _LOGGER.info("socket connection failed")
             return
 
+        _LOGGER.debug("reading for cmd session setup")
         if self.read_data() == messages.NACK:
             _LOGGER.exception("Could not initialize connection with the gateway")
 
@@ -108,7 +113,7 @@ class CommandClient:
         answer = self.read_data()
         if answer == messages.NACK:
             _LOGGER.exception("The gateway refused the session command")
-            return False
+            return
 
         self.send_password(answer)
 
@@ -119,13 +124,15 @@ class CommandClient:
 
     def connect(self):
         _LOGGER.debug("connecting with %s:%s",self._host, self._port)
+        self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self._socket.settimeout(self._timeout)
         try:
             self._socket.connect((self._host, self._port))
             return True
-        except IOError:
+        except IOError as e:
             _LOGGER.exception("Could not connect")
             self._socket.close()
-            return False
+        return False
 
     def send_password(self, nonce):
         psw_open = '*#' + str(calculate_password(self._password, nonce)) + '##'

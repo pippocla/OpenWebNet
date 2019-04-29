@@ -1,9 +1,10 @@
 
-import os
-import yaml
 from time import sleep
 from client import get_command_client
-import timeit
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+
 
 LIGHT = '17'
 
@@ -15,7 +16,7 @@ def main():
 
     while True:
         print(client.request_state('1', LIGHT))
-        time.sleep(1)
+        sleep(1)
 
 if __name__ == '__main__':
     main()
