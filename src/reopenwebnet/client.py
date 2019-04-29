@@ -16,24 +16,14 @@ _LOGGER = getLogger(__name__)
 """
 
 class CommandClient:
-    def __init__(self, host, port, password):
+    def __init__(self, host, port, password, timeout=3.0):
         self._host = host
         self._port = int(port)
         self._password = password
         self._session = False
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self._socket.settimeout(20.0)
+        self._socket.settimeout(timeout)
         self._lock = threading.Lock()
-
-    def connect(self):
-        _LOGGER.debug("connecting with %s:%s",self._host, self._port)
-        try:
-            self._socket.connect((self._host, self._port))
-            return True
-        except IOError:
-            _LOGGER.exception("Could not connect")
-            self._socket.close()
-            return False
 
     def normal_request(self, who, where, what):
         """ Handles a normal request.  Throws an exception when response does ends with NACK """
@@ -41,12 +31,20 @@ class CommandClient:
         request = '*' + who + '*' + what + '*' + where + '##'
         frames = self._execute_request(request)
 
+        if frames is None:
+            return None
+
         if frames[-1] == messages.NACK:
             _LOGGER.exception("Error: command execution failed")
+            return False
+        return True
 
     def request_state(self, who, where):
         who,where = str(who),str(where)
         frames = self.request_state_multi(who, where)
+
+        if frames is None:
+            return None
 
         if len(frames) != 1:
             _LOGGER.error('single state request yielded multiple messages')
@@ -65,20 +63,31 @@ class CommandClient:
         request = '*#' + who + '*' + where + '##'
         frames = self._execute_request(request)
 
+        if frames is None:
+            return None
+
         if frames[-1] != messages.ACK:
             _LOGGER.error('response does not end with ACK')
-            raise Exception('response does not end with ACK')
+            return None
 
         return self.convert_frames_to_tuples(frames[:-1])
 
     def _execute_request(self, request):
         """ sends a request and returns a list of frames sent back by the gateway"""
         response = None
+
         with self._lock:
-            if not self._session:
-                self.cmd_session() 
-            self.send_data(request)
-            response = self._read_complete_response() 
+            try:
+                if not self._session:
+                    self.cmd_session() 
+                self.send_data(request)
+                response = self._read_complete_response() 
+            except IOError:
+                self._session = False 
+                self._socket.close()
+
+        if response is None:
+            return response
 
         frames =  [ x + "##" for x in response.split("##")[:-1]]
         if frames[-1] != messages.ACK:
@@ -107,6 +116,16 @@ class CommandClient:
             _LOGGER.exception("Password refused")
         else:
             self._session = True
+
+    def connect(self):
+        _LOGGER.debug("connecting with %s:%s",self._host, self._port)
+        try:
+            self._socket.connect((self._host, self._port))
+            return True
+        except IOError:
+            _LOGGER.exception("Could not connect")
+            self._socket.close()
+            return False
 
     def send_password(self, nonce):
         psw_open = '*#' + str(calculate_password(self._password, nonce)) + '##'
