@@ -12,6 +12,7 @@ import sys
 
 from pkg_resources import require, VersionConflict
 from setuptools import setup
+from os import path
 
 try:
     require('setuptools>=38.3')
@@ -19,6 +20,11 @@ except VersionConflict:
     print("Error: version of setuptools is too old (<38.3)!")
     sys.exit(1)
 
+this_directory = path.abspath(path.dirname(__file__))
+with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
 
 if __name__ == "__main__":
-    setup(use_pyscaffold=True)
+    setup(use_pyscaffold=True
+          long_description=long_description,
+          long_description_content_type='text/markdown')

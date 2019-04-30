@@ -40,22 +40,26 @@ class CommandClient:
 
     def request_state(self, who, where):
         who,where = str(who),str(where)
-        frames = self.request_state_multi(who, where)
 
-        if frames is None:
-            return None
+        result = None
+        tries_remain = 5
+        while result is None and tries_remain > 0: 
+            frames = self.request_state_multi(who, where)
+            if frames is None:
+                continue
 
-        if len(frames) != 1:
-            _LOGGER.error('single state request yielded multiple messages')
-            return None
+            if len(frames) != 1:
+                #_LOGGER.error('single state request yielded multiple messages')
+                continue
 
-        frame = frames[0]
+            frame = frames[0]
 
-        if (frame[0] != who or frame[2] != where):
-            _LOGGER.error("requested status for %s/%s but got response for %s/%s"%(who, where, frame[0], frame[2]))
-            return None
+            if (frame[0] != who or frame[2] != where):
+                #_LOGGER.error("requested status for %s/%s but got response for %s/%s"%(who, where, frame[0], frame[2]))
+                continue
 
-        return frame[1]
+            return frame[1]
+        return None
             
     def request_state_multi(self, who, where):
         who,where=str(who),str(where)
