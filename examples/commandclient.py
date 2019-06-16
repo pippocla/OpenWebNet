@@ -1,11 +1,3 @@
-# @Author: michael
-# @Date:   05-Jun-2019
-# @Filename: commandclient.py
-# @Last modified by:   michael
-# @Last modified time: 05-Jun-2019
-# @License: GNU GPL v3
-
-
 import os
 from time import sleep
 

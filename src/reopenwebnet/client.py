@@ -1,10 +1,3 @@
-# @Author: michael
-# @Date:   05-Jun-2019
-# @Filename: client.py
-# @Last modified by:   michael
-# @Last modified time: 05-Jun-2019
-# @License: GNU GPL v3
-
 
 # -*- coding: utf-8 -*-
 import socket
@@ -244,10 +237,13 @@ class CommandClient:
         self.normal_request('2', str(where), str(what))
 
     def shutter_off(self, where):
+        """Lower the electric shutters."""
         self.shutter_command(where, 2)
 
     def shutter_on(self, where):
+        """Fit the electric shutters."""
         self.shutter_command(where, 1)
 
     def shutter_stop(self, where):
+        """Stop the electric shutters."""
         self.shutter_command(where, 0)
