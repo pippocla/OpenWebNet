@@ -1,7 +1,8 @@
+
 # -*- coding: utf-8 -*-
 import socket
-from logging import getLogger
 import threading
+from logging import getLogger
 
 from reopenwebnet import messages
 from reopenwebnet.password import calculate_password
@@ -15,6 +16,7 @@ _LOGGER = getLogger(__name__)
    decoded frame = all the values in a frame converted to tuple. e.g. *#4*#0*#0*0250*1## becomes ('#4', '#0', '#0', '0250', '1')
 """
 
+
 class CommandClient:
     def __init__(self, host, port, password, timeout=3.0):
         self._host = host
@@ -26,7 +28,7 @@ class CommandClient:
 
     def normal_request(self, who, where, what):
         """ Handles a normal request.  Throws an exception when response does ends with NACK """
-        who,where,what = str(who),str(where),str(what)
+        who, where, what = str(who), str(where), str(what)
         request = '*' + who + '*' + what + '*' + where + '##'
         frames = self._execute_request(request)
 
@@ -39,11 +41,11 @@ class CommandClient:
         return True
 
     def request_state(self, who, where):
-        who,where = str(who),str(where)
+        who, where = str(who), str(where)
 
         result = None
         tries_remain = 5
-        while result is None and tries_remain > 0: 
+        while result is None and tries_remain > 0:
             frames = self.request_state_multi(who, where)
             if frames is None:
                 continue
@@ -60,9 +62,9 @@ class CommandClient:
 
             return frame[1]
         return None
-            
+
     def request_state_multi(self, who, where):
-        who,where=str(who),str(where)
+        who, where = str(who), str(where)
         request = '*#' + who + '*' + where + '##'
         frames = self._execute_request(request)
 
@@ -82,21 +84,21 @@ class CommandClient:
         with self._lock:
             try:
                 if not self._session:
-                    self.cmd_session() 
+                    self.cmd_session()
 
                 if not self._session:
                     return None
                 _LOGGER.debug('about to send request')
                 self.send_data(request)
-                response = self._read_complete_response() 
+                response = self._read_complete_response()
             except (IOError, OSError, socket.timeout) as e:
-                self._session = False 
+                self._session = False
                 self._socket.close()
 
         if response is None:
             return response
 
-        frames =  [ x + "##" for x in response.split("##")[:-1]]
+        frames = [x + "##" for x in response.split("##")[:-1]]
         if frames[-1] != messages.ACK:
             _LOGGER.error("response did not end with ACK frame: " + frames)
 
@@ -110,7 +112,8 @@ class CommandClient:
 
         _LOGGER.debug("reading for cmd session setup")
         if self.read_data() == messages.NACK:
-            _LOGGER.exception("Could not initialize connection with the gateway")
+            _LOGGER.exception(
+                "Could not initialize connection with the gateway")
 
         self.send_data(messages.CMD_SESSION)
 
@@ -127,7 +130,7 @@ class CommandClient:
             self._session = True
 
     def connect(self):
-        _LOGGER.debug("connecting with %s:%s",self._host, self._port)
+        _LOGGER.debug("connecting with %s:%s", self._host, self._port)
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._socket.settimeout(self._timeout)
         try:
@@ -189,8 +192,9 @@ class CommandClient:
         if not self._session:
             self.cmd_session()
 
-        write_values = ''.join(['*%s'%item for item in values])
-        write_request = '*#' + who + '*' + where + '*#' + dimension + write_values + '##'
+        write_values = ''.join(['*%s' % item for item in values])
+        write_request = '*#' + who + '*' + where + \
+            '*#' + dimension + write_values + '##'
         frames = self._execute_request(write_request)
 
         # TODO: check / parse frames
@@ -229,3 +233,17 @@ class CommandClient:
         else:
             return 'ON'
 
+    def shutter_command(self, where, what):
+        self.normal_request('2', str(where), str(what))
+
+    def shutter_off(self, where):
+        """Lower the electric shutters."""
+        self.shutter_command(where, 2)
+
+    def shutter_on(self, where):
+        """Fit the electric shutters."""
+        self.shutter_command(where, 1)
+
+    def shutter_stop(self, where):
+        """Stop the electric shutters."""
+        self.shutter_command(where, 0)

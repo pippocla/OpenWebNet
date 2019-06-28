@@ -25,10 +25,33 @@ client = CommandClient(host, port, password)
 
 # Turns on the light with id '10'
 client.normal_request('1', '10', '1')
+# Or
+client.light_on('10')
 
 # Prints the status of the light with id '11'
 print(client.request_state('1', '11'))
+# Or
+print(client.light_status('11'))
+
+# Fit the electric shutters with id '20'
+client.shutter_on('20')
 ```
+
+### Resume:
+
+Command | Description
+------- | ----------
+normal_request(who, what, where) | Send a request
+request_state(who, where) | Send a state request
+light_on(where) | Turn on the light
+light_off(where) | Turn off the light
+light_status(where) | Get the status of the light
+read_temperature(where) | Get the temperature
+read_set_temperature(where) | Get the temperature set
+read_valve_status(where) | Get the status of temperature valve
+shutter_off(where) | Lower the electric shutters
+shutter_on(where) | Fit the electric shutters
+shutter_stop(where) | Stop the electric shutters
 
 ### EventClient
 

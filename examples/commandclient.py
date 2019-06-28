@@ -1,10 +1,14 @@
-
 import os
-import yaml
 from time import sleep
+
+import yaml
+
 from client import get_command_client
 
 KITCHEN_LIGHT = '13'
+
+KITCHEN_SHUTTER = '52'
+
 
 def main():
     client = get_command_client()
@@ -20,19 +24,28 @@ def main():
 
     turn_off(client, KITCHEN_LIGHT)
     print_light_status(client, KITCHEN_LIGHT)
+    sleep(3)
+
+    turn_off_shutter(client, KITCHEN_SHUTTER)
+    sleep(3)
+
+    turn_on_shutter(client, KITCHEN_SHUTTER)
 
 
 def print_status_all_lights(client):
     print("Fetching status of all lights with 1 command")
     print(client.request_state_multi('1', '0'))
 
+
 def turn_off(client, where):
     print("Sending light off command")
     client.light_off(where)
 
+
 def turn_on(client, where):
     print("Sending light on command")
     client.light_on(where)
+
 
 def print_light_status(client, where):
     status = client.light_status(where)
@@ -43,6 +56,17 @@ def print_light_status(client, where):
         print("Light is currently off")
     else:
         print("Light status = ", status)
+
+
+def turn_on_shutter(client, where):
+    print("Sending shutter on command")
+    client.shutter_on(where)
+
+
+def turn_off_shutter(client, where):
+    print("Sending shutter off command")
+    client.shutter_off(where)
+
 
 if __name__ == '__main__':
     main()
