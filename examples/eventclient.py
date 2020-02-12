@@ -1,20 +1,24 @@
+import asyncio
+import logging
 
-import os
-import yaml
-from time import sleep
-from client import get_event_client
+from reopenwebnet.client_factory import ClientFactory
 
-def main():
-    client = get_event_client(handle_connect, handle_message)
-    client.start()
-    print("I will listen for events for 20 seconds. Try switching a few lights on and off")
-    sleep(20)
 
-def handle_connect():
-    print("Connected with gateway")
+async def eventclient_demo():
+    def handle_connect():
+        print("connected to openwebnet service")
 
-def handle_message(msg):
-    print(msg)
+    def handle_messages(msgs):
+        print("received messages: ", msgs)
 
-if __name__=='__main__':
-    main()
+    client = ClientFactory().get_event_client(handle_connect, handle_messages)
+    await client.start()
+
+    print("Will listen for events for 1 hour. Hit ctrl-c to stop")
+    await asyncio.sleep(3600)
+
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
+
+    asyncio.run(eventclient_demo())

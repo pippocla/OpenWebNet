@@ -25,4 +25,4 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 if __name__ == "__main__":
-    setup(use_pyscaffold=True, long_description=long_description, long_description_content_type='text/markdown')
+    setup(use_pyscaffold=True, long_description=long_description)

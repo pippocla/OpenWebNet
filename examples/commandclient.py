@@ -1,61 +1,50 @@
-import os
+import asyncio
 from time import sleep
 
-import yaml
+from reopenwebnet.client_factory import ClientFactory
+from reopenwebnet import messages
 
-from client import get_command_client
+import logging
 
 KITCHEN_LIGHT = '13'
 
-KITCHEN_SHUTTER = '52'
+logging.basicConfig(level=logging.INFO)
 
 
-def main():
-    client = get_command_client()
-
-    print_status_all_lights(client)
-
-    print_light_status(client, KITCHEN_LIGHT)
-    sleep(3)
-
-    turn_on(client, KITCHEN_LIGHT)
-    print_light_status(client, KITCHEN_LIGHT)
-    sleep(3)
-
-    turn_off(client, KITCHEN_LIGHT)
-    print_light_status(client, KITCHEN_LIGHT)
-    sleep(3)
-
-    turn_off_shutter(client, KITCHEN_SHUTTER)
-    sleep(3)
-
-    turn_on_shutter(client, KITCHEN_SHUTTER)
+async def commandclient_demo():
+    client = ClientFactory().get_command_client()
+    await client.start()
+    await example_single_light_status(client)
+    await example_all_lights_status_request(client)
+    await example_light_commands(client)
 
 
-def print_status_all_lights(client):
-    print("Fetching status of all lights with 1 command")
-    print(client.request_state_multi('1', '0'))
+async def example_light_commands(client):
+    print("2 x turn light on & turn it off again")
+    for i in range(2):
+        print("on")
+        print(await client.send_command(messages.NormalMessage('1', '1', KITCHEN_LIGHT)))
+        sleep(1)
+        print("off")
+        print(await client.send_command(messages.NormalMessage('1', '0', KITCHEN_LIGHT)))
+        sleep(1)
+
+    print("Requesting light status")
+    print(await client.send_command(messages.StatusRequestMessage('1', KITCHEN_LIGHT)))
+    sleep(1)
 
 
-def turn_off(client, where):
-    print("Sending light off command")
-    client.light_off(where)
+async def example_all_lights_status_request(client):
+    print("Request all lights status")
+    print(await client.send_command(messages.StatusRequestMessage('1', '0')))
+    sleep(1)
 
 
-def turn_on(client, where):
-    print("Sending light on command")
-    client.light_on(where)
-
-
-def print_light_status(client, where):
-    status = client.light_status(where)
-
-    if status == '1':
-        print("Light is currently on")
-    elif status == '0':
-        print("Light is currently off")
-    else:
-        print("Light status = ", status)
+async def example_single_light_status(client):
+    print("3 x Request light status with 3 second intervals")
+    for i in range(3):
+        print(await client.send_command(messages.StatusRequestMessage('1', KITCHEN_LIGHT)))
+        await asyncio.sleep(3)
 
 
 def turn_on_shutter(client, where):
@@ -69,4 +58,6 @@ def turn_off_shutter(client, where):
 
 
 if __name__ == '__main__':
-    main()
+    logging.basicConfig(level=logging.DEBUG)
+
+    asyncio.run(commandclient_demo())
