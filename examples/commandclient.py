@@ -1,10 +1,12 @@
 import asyncio
 from time import sleep
 
-from reopenwebnet.client_factory import ClientFactory
 from reopenwebnet import messages
 
 import logging
+
+from reopenwebnet.commandclient import CommandClient
+from reopenwebnet.config import read_environment_config
 
 KITCHEN_LIGHT = '13'
 
@@ -12,8 +14,12 @@ logging.basicConfig(level=logging.INFO)
 
 
 async def commandclient_demo():
-    client = ClientFactory().get_command_client()
-    await client.start()
+    def on_connect():
+        print("command session started")
+    client = CommandClient(read_environment_config(), on_connect)
+
+    asyncio.ensure_future(client.start())
+
     await example_single_light_status(client)
     await example_all_lights_status_request(client)
     await example_light_commands(client)

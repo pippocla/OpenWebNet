@@ -2,43 +2,58 @@ import asyncio
 import logging
 
 from reopenwebnet import messages
-from reopenwebnet.client_factory import ClientFactory
+from reopenwebnet.commandclient import CommandClient
+from reopenwebnet.eventclient import EventClient
 from reopenwebnet.messages import TYPE_NORMAL
 
 LOGGER = logging.getLogger()
 
 
 class GatewayProxy:
-    def __init__(self, event_listener=None):
-        self.event_listener = event_listener
+    def __init__(self, config, on_state_change=None):
+        self.on_state_change = on_state_change
+
+        def on_command_session():
+            self.on_command_session()
+
+        def on_event_session():
+            self.on_event_session()
+
+        def on_event(msgs):
+            self.on_event(msgs)
+
+        self.command_client = CommandClient(config, on_command_session)
+        self.event_client = EventClient(config, on_event_session, on_event)
 
         self.states = {}
-        self.command_client = None
-        self.event_client = None
 
-    async def start(self):
-        def on_event_client_connect():
-            asyncio.ensure_future(self.on_event_client_connect())
+        self.listeners = {}
 
-        def on_event(message):
-            self._process_messages(message)
+    def start(self):
+        asyncio.ensure_future(self.command_client.start())
+        asyncio.ensure_future(self.event_client.start())
 
-        factory = ClientFactory()
-        self.command_client = factory.get_command_client()
-        self.event_client = factory.get_event_client(on_event_client_connect, on_event)
+    def register_listener(self, who, where, callback):
+        self.listeners.setdefault(who, {})[where] = callback
+        state = self.states.setdefault(who, {}).get(where, None)
 
-        LOGGER.debug("starting command client")
-        await self.command_client.start()
+        # send initial state
+        if state is not None:
+            callback(state)
 
-        LOGGER.debug("starting event client (async, so there is no 'start complete' log message)")
-        await self.command_client.start()
+    async def cmd(self, msg):
+        return await self.command_client.send_command(msg)
 
-        await self.fetch_all_light_states()
+    def on_command_session(self):
+        asyncio.ensure_future(self.fetch_full_state())
 
-    async def on_event_client_connect(self):
-        await self.fetch_all_light_states()
+    def on_event_session(self):
+        asyncio.ensure_future(self.fetch_full_state())
 
-    async def fetch_all_light_states(self):
+    def on_event(self, msgs):
+        self._process_messages(msgs)
+
+    async def fetch_full_state(self):
         LOGGER.debug("fetching initial light states")
         initial_light_states = await self.send_cmd(messages.StatusRequestMessage('1', '0'))
 
@@ -48,31 +63,15 @@ class GatewayProxy:
         result = await self.command_client.send_command(message)
         return result
 
-    def print_states(self):
-        for (who, state) in self.states.items():
-            print("Who: ", who)
-            for (k,v) in state.items():
-                print(k, " --> ", v)
-
-        print()
-
     def _process_messages(self, msgs):
-        if self.event_listener is not None:
-            self.event_listener(msgs)
         for msg in msgs:
             if msg.type == TYPE_NORMAL:
-                self.states.setdefault(msg.who, {})[msg.where] = msg.what
-
-
-async def gatewayproxy_demo():
-    gw = GatewayProxy()
-
-    await gw.start()
-    print("Will print states every 3 seconds. Use Ctrl-C to stop")
-    while True:
-        await asyncio.sleep(3)
-        gw.print_states()
-
-
-if __name__ == "__main__":
-    asyncio.run(gatewayproxy_demo())
+                item = self.states.setdefault(msg.who, {})
+                current_value = item.get(msg.where, None)
+                if current_value is None or current_value.what != msg.what:
+                    if self.on_state_change is not None:
+                        self.on_state_change(msg)
+                    listener = self.listeners.get(msg.who, {}).get(msg.where, None)
+                    if listener is not None:
+                        listener(msg)
+                self.states.setdefault(msg.who, {})[msg.where] = msg

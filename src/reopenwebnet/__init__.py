@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 from pkg_resources import get_distribution, DistributionNotFound
 
-from reopenwebnet import messages
-from reopenwebnet import client_factory
 from reopenwebnet import commandclient
 from reopenwebnet import eventclient
 from reopenwebnet import gatewayproxy
+from reopenwebnet import messages
 
-__all__=[messages, client_factory, commandclient, eventclient, gatewayproxy]
+__all__=[messages, commandclient, eventclient, gatewayproxy]
 
 
 try:

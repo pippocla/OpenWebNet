@@ -1,17 +1,18 @@
 import asyncio
-from time import sleep
-
-from reopenwebnet.gatewayproxy import GatewayProxy
-from reopenwebnet import messages
-
 import logging
+
+from reopenwebnet.config import read_environment_config
+from reopenwebnet.gatewayproxy import GatewayProxy
 
 KITCHEN_LIGHT = '13'
 
 
 async def gatewayproxy_demo():
-    gw = GatewayProxy()
-    await gw.start()
+    def on_state_change(msg):
+        print("State change", msg)
+
+    gw = GatewayProxy(read_environment_config(), on_state_change)
+    gw.start()
     await example_print_status(gw)
 
 
@@ -22,7 +23,7 @@ async def example_print_status(gateway):
         "is restored")
 
     while True:
-        gateway.print_states()
+        print(gateway.states)
         await asyncio.sleep(2)
 
 

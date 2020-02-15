@@ -6,6 +6,7 @@ TYPE_STATUS_REQUEST = 'STATUS_REQUEST'
 TYPE_DIMENSION_REQUEST = 'DIMENSION_REQUEST'
 TYPE_DIMENSION_WRITING = 'DIMENSION_WRITING'
 
+
 class FixedMessage:
     def __init__(self, value, message_type):
         self.value = value

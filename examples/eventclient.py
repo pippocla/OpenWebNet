@@ -1,18 +1,19 @@
 import asyncio
 import logging
 
-from reopenwebnet.client_factory import ClientFactory
+from reopenwebnet.config import read_environment_config
+from reopenwebnet.eventclient import EventClient
 
 
 async def eventclient_demo():
-    def handle_connect():
-        print("connected to openwebnet service")
+    def on_session_start():
+        print("event session started")
 
-    def handle_messages(msgs):
+    def on_event(msgs):
         print("received messages: ", msgs)
 
-    client = ClientFactory().get_event_client(handle_connect, handle_messages)
-    await client.start()
+    client = EventClient(read_environment_config(), on_session_start, on_event)
+    asyncio.ensure_future(client.start())
 
     print("Will listen for events for 1 hour. Hit ctrl-c to stop")
     await asyncio.sleep(3600)
