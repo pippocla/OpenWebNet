@@ -5,10 +5,21 @@ from yaml import SafeLoader
 
 
 class Config:
-    def __init__(self, host, port, password):
-        self.host = host
-        self.port = port
-        self.password = password
+    def __init__(self, config_dict):
+        self.host = config_dict['host']
+        self.port = config_dict['port']
+        self.password = config_dict['password']
+
+        self.mqtt = MqttConfig(config_dict['mqtt'])
+
+
+class MqttConfig:
+    def __init__(self, config_dict):
+        self.host = config_dict['host']
+        self.port = config_dict['port']
+        self.user = config_dict.get('user')
+        self.password = config_dict.get('password')
+        self.client_id = config_dict.get('client_id')
 
 
 def read_environment_config():
@@ -16,4 +27,4 @@ def read_environment_config():
     config_path = os.environ.get('REOPENWEBNET_CONFIG', default_config_path)
 
     yml_config = yaml.load(open(config_path), Loader=SafeLoader)
-    return Config(yml_config['host'], yml_config['port'], yml_config.get('password', None))
+    return Config(yml_config)

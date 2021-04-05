@@ -19,6 +19,7 @@ class EventClient:
         self.client = OpenWebNetClient(config, messages.EVENT_SESSION, on_session_start, on_event)
 
     async def start(self):
+        logging.debug('eventclient starting')
         await self.client.start()
 
     def stop(self):

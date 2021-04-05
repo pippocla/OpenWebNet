@@ -10,21 +10,27 @@ This project started as a fork from https://github.com/pippocla/openwebnet
 
 Asynchronous components for interacting with the gateway.
 
-The author's OpenWebNet gateway doesn't respond well to sending commands
+### Python component
 
-Low level components:
+### MQTT Bridge
+
+See bin/openwebnet-mqtt-bridge
+This bridge communicates with an openwebnet service over http and and mqtt service.
+This should make it easier to interact with openwebnet in various tools (OpenHAB, Homeassistant, Node-Red)
+
+#### Low level components:
   - CommandClient: establishes command sessions and lets you send commands and read the gateway's responses.  The CommandClient does simple rate limiting because the OpenWebNet gateway seems to misbehave if you send too many commands in a short time.
   - EventClient: establishes event sessions.
 
-Both components automatically reconnect in case of connection loss.
+Both components should automatically reconnect in case of connection loss.
 
-Higher level components:
+### Higher level components:
  - ClientFactory: reads configuration from file and can create CommandClient and EventClient instances
  - GatewayProxy: Creates a CommandClient and an EventClient and keeps state in sync.
 
 ## Examples
 
-See examples/ for examples on the various components
+See examples/ for programming examples for the various components
 
 ## Testing
 

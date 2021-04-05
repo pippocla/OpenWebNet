@@ -4,6 +4,7 @@ TYPE_NACK = 'NACK'
 TYPE_NORMAL = 'NORMAL'
 TYPE_STATUS_REQUEST = 'STATUS_REQUEST'
 TYPE_DIMENSION_REQUEST = 'DIMENSION_REQUEST'
+TYPE_DIMENSION_READING = 'DIMENSION_READING'
 TYPE_DIMENSION_WRITING = 'DIMENSION_WRITING'
 
 
@@ -55,6 +56,22 @@ class DimensionRequestMessage:
 
     def __str__(self):
         return f"*#{self.who}*{self.where}*{self.dimension}##"
+
+    def __repr__(self):
+        return f"{self.type} : {self}"
+
+
+class DimensionReadingMessage:
+    def __init__(self, who, where, dimension, values):
+        self.who = who
+        self.where = where
+        self.dimension = dimension
+        self.values = values
+        self.type = TYPE_DIMENSION_READING
+
+    def __str__(self):
+        values = "*".join(self.values)
+        return f"*#{self.who}*{self.where}*{self.dimension}*{values}##"
 
     def __repr__(self):
         return f"{self.type} : {self}"
@@ -119,7 +136,7 @@ def parse_message(data):
         return DimensionRequestMessage(parts[0][1:], parts[1], parts[2])
 
     if not parts[2].startswith("#"):
-        bad_message(data)
+        return DimensionReadingMessage(parts[0][1:], parts[1], parts[2], parts[3:])
 
     return DimensionWritingMessage(parts[0][1:], parts[1], parts[2][1:], parts[3:])
 

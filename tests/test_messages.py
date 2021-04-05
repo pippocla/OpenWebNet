@@ -42,6 +42,17 @@ def test_parse_messages_dimension_request():
     assert_equal(actual.dimension, '3')
 
 
+def test_parse_messages_dimension_reading():
+    actual = parse_message("*#1*02*4*100*2##")
+
+    assert_equal(actual.type, messages.TYPE_DIMENSION_READING)
+    assert_equal(str(actual), "*#1*02*4*100*2##")
+    assert_equal(actual.who, '1')
+    assert_equal(actual.where, '02')
+    assert_equal(actual.dimension, '4')
+    assert_equal(actual.values, ['100', '2'])
+
+
 def test_parse_messages_dimension_writing():
     actual = parse_message("*#1*2*#3*4*5##")
 
@@ -57,4 +68,5 @@ def test_parse_nonce_message():
 
     assert_equal(actual.type, messages.TYPE_OTHER)
     assert_equal(actual.value, "*#123456789##")
+
 

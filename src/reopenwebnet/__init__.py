@@ -5,8 +5,9 @@ from reopenwebnet import commandclient
 from reopenwebnet import eventclient
 from reopenwebnet import gatewayproxy
 from reopenwebnet import messages
+from reopenwebnet import mqtt
 
-__all__=[messages, commandclient, eventclient, gatewayproxy]
+__all__=[messages, commandclient, eventclient, gatewayproxy, mqtt]
 
 
 try:

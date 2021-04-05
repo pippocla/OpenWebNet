@@ -4,7 +4,6 @@ import logging
 from reopenwebnet import messages
 from reopenwebnet.commandclient import CommandClient
 from reopenwebnet.eventclient import EventClient
-from reopenwebnet.messages import TYPE_NORMAL
 
 LOGGER = logging.getLogger()
 
@@ -65,7 +64,7 @@ class GatewayProxy:
 
     def _process_messages(self, msgs):
         for msg in msgs:
-            if msg.type == TYPE_NORMAL:
+            if msg.__class__ == messages.CommandOrStatusMessage:
                 item = self.states.setdefault(msg.who, {})
                 current_value = item.get(msg.where, None)
                 if current_value is None or current_value.what != msg.what:
