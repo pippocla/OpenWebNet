@@ -1,8 +1,10 @@
 import asyncio
+import logging
 import socket
 
 from reopenwebnet.protocol import OpenWebNetProtocol
 
+_LOGGER = logging.getLogger(__name__)
 
 class OpenWebNetClient:
     def __init__(self, host, port, password, session_type):
@@ -31,4 +33,7 @@ class OpenWebNetClient:
         self.on_con_lost = on_con_lost
 
     def send_message(self, msg):
+        if self.protocol is None:
+            _LOGGER.error("Could not send message; Did you call client.start()?")
+            return
         self.protocol.send_message(msg)
