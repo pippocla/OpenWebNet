@@ -63,7 +63,7 @@ class MqttBridge:
 
 def _create_mqtt_client(mqtt_config):
     client = mqtt.Client(mqtt_config.client_id)
-    if mqtt_config.user is not None:
+    if mqtt_config.user is not None and mqtt_config.user != '':
         client.username_pw_set(mqtt_config.user, mqtt_config.password)
 
     def on_connect(client, b, c, d):

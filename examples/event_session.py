@@ -1,8 +1,13 @@
 import asyncio
 from asyncio import FIRST_COMPLETED
 
-from reopenwebnet.client import OpenWebNetClient
 from reopenwebnet import messages
+from reopenwebnet.client import OpenWebNetClient
+
+HOST = '192.168.0.1'
+PORT = 20000
+PASSWORD = '951753'
+
 
 async def main():
     loop = asyncio.get_running_loop()
@@ -11,7 +16,7 @@ async def main():
     def on_event(*args):
         print("got event", args)
 
-    client = OpenWebNetClient('192.168.0.10', 20000, '951753', session_type=messages.EVENT_SESSION)
+    client = OpenWebNetClient(HOST, PORT, PASSWORD, session_type=messages.EVENT_SESSION)
     await client.start(on_event)
 
     # Schedule stop
