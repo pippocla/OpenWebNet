@@ -1,14 +1,16 @@
 import asyncio
+import logging
 import socket
-from asyncio import FIRST_COMPLETED
 
 from reopenwebnet import messages
 from reopenwebnet.protocol import OpenWebNetProtocol
 
-# logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG)
+
 
 async def schedule_stop(delay):
     return asyncio.ensure_future(asyncio.sleep(delay))
+
 
 async def main():
     loop = asyncio.get_running_loop()
@@ -19,17 +21,30 @@ async def main():
 
     transport, protocol, on_con_lost = await start_openwebnet(loop, on_event)
 
-    # Schedule stop
-    delay = 10
-    print("Listening for openwebnet events for %d seconds. Try switching a light on and off" % delay)
-    on_stop = await schedule_stop(delay)
+    # Wait a bit (protocol still initializing)
+    await asyncio.sleep(1)
 
-    # Wait until scheduled stop or connection loss
-    done, pending = await asyncio.wait([on_con_lost, on_stop], return_when=FIRST_COMPLETED)
-    if on_con_lost in done:
-        print("Connection lost")
-    if on_stop in done:
-        print("Scheduled stop")
+    # Play with the lights
+    await light_on(protocol)
+
+    await asyncio.sleep(1)
+    await light_off(protocol)
+
+    await asyncio.sleep(1)
+    await light_on(protocol)
+
+    await asyncio.sleep(1)
+    await light_off(protocol)
+
+
+async def light_off(protocol):
+    print("Light off")
+    protocol.send_message(messages.NormalMessage(1, 0, 13))
+
+
+async def light_on(protocol):
+    print("Light on")
+    protocol.send_message(messages.NormalMessage(1, 1, 13))
 
 
 async def start_openwebnet(loop, on_event):
@@ -38,8 +53,9 @@ async def start_openwebnet(loop, on_event):
     on_con_lost = loop.create_future()
 
     transport, protocol = await loop.create_connection(
-        lambda: OpenWebNetProtocol(messages.EVENT_SESSION, '951753', on_event, on_con_lost),
+        lambda: OpenWebNetProtocol(messages.CMD_SESSION, '951753', on_event, on_con_lost),
         sock=mysock)
+
     return transport, protocol, on_con_lost
 
 

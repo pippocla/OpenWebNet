@@ -40,7 +40,7 @@ class OpenWebNetProtocol(asyncio.Protocol):
 
         elif self.state == 'CONNECTED':
             if msgs[0] == messages.ACK:
-                self.send_message(self.session_type)
+                self._send_message(self.session_type)
                 self.state = 'SESSION_REQUESTED'
             else:
                 _LOGGER.error('Did not get initial ack on connect')
@@ -52,7 +52,7 @@ class OpenWebNetProtocol(asyncio.Protocol):
             nonce = msgs[0].value[2:-2]
 
             password = calculate_password(self.password, nonce)
-            self.send_message(messages.FixedMessage(f"*#{password}##", messages.TYPE_OTHER))
+            self._send_message(messages.FixedMessage(f"*#{password}##", messages.TYPE_OTHER))
             self.state = 'PASSWORD_SENT'
 
         elif self.state == 'PASSWORD_SENT':
@@ -66,15 +66,22 @@ class OpenWebNetProtocol(asyncio.Protocol):
             _LOGGER.debug("sending messages to event listener %s", msgs)
             self.event_listener(msgs)
 
-    def send_message(self, message):
+    def _send_message(self, message):
         now = time.time()
         if now < self.next_message:
             time.sleep(self.next_message - now)
         self.next_message = now + self.write_delay
         self.transport.write(str(message).encode('utf-8'))
 
+    def send_message(self, message):
+        if self.state != 'EVENT_SESSION_ACTIVE':
+            print("Not sending message - session not active yet")
+            # TODO: use an event to indicate when session is active
+            return
+        self._send_message(message)
+
     def connection_lost(self, exc):
-        print("in protocol.connection_lost")
+        print("in protocol.connection_lost", exc)
         self.state = 'NOT_CONNECTED'
         self.transport = None
         self.on_connection_lost.set_result(False)
