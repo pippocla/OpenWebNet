@@ -1,9 +1,8 @@
 import asyncio
 import logging
-import socket
 
 from reopenwebnet import messages
-from reopenwebnet.protocol import OpenWebNetProtocol
+from reopenwebnet.client import OpenWebNetClient
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -13,49 +12,33 @@ async def schedule_stop(delay):
 
 
 async def main():
-    loop = asyncio.get_running_loop()
-
-    # Start openwebnet protocol
     def on_event(*args):
         print("got event", args)
 
-    transport, protocol, on_con_lost = await start_openwebnet(loop, on_event)
+    client = OpenWebNetClient('192.168.0.10', 20000, '951753', messages.CMD_SESSION)
+    await client.start()
 
     # Play with the lights
-    await light_on(protocol)
+    await light_on(client)
 
     await asyncio.sleep(1)
-    await light_off(protocol)
+    await light_off(client)
 
     await asyncio.sleep(1)
-    await light_on(protocol)
+    await light_on(client)
 
     await asyncio.sleep(1)
-    await light_off(protocol)
+    await light_off(client)
 
 
-async def light_off(protocol):
+async def light_off(client):
     print("Light off")
-    protocol.send_message(messages.NormalMessage(1, 0, 13))
+    client.send_message(messages.NormalMessage(1, 0, 13))
 
 
-async def light_on(protocol):
+async def light_on(client):
     print("Light on")
-    protocol.send_message(messages.NormalMessage(1, 1, 13))
-
-
-async def start_openwebnet(loop, on_event):
-    mysock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    mysock.connect(('192.168.0.10', 20000))
-    on_con_lost = loop.create_future()
-    on_session_start = loop.create_future()
-
-    transport, protocol = await loop.create_connection(
-        lambda: OpenWebNetProtocol(messages.CMD_SESSION, '951753', on_session_start, on_event, on_con_lost),
-        sock=mysock)
-
-    await on_session_start
-    return transport, protocol, on_con_lost
+    client.send_message(messages.NormalMessage(1, 1, 13))
 
 
 asyncio.run(main())

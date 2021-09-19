@@ -67,7 +67,8 @@ class OpenWebNetProtocol(asyncio.Protocol):
 
         elif self.state == 'EVENT_SESSION_ACTIVE':
             _LOGGER.debug("sending messages to event listener %s", msgs)
-            self.event_listener(msgs)
+            if self.event_listener is not None:
+                self.event_listener(msgs)
 
     def _send_message(self, message):
         now = time.time()
