@@ -12,10 +12,11 @@ _LOGGER = getLogger(__name__)
 
 
 class OpenWebNetProtocol(asyncio.Protocol):
-    def __init__(self, session_type, password, event_listener, on_connection_lost):
+    def __init__(self, session_type, password, on_session_start, event_listener, on_connection_lost):
         self.session_type = session_type
         self.password = password
         self.write_delay=0.1
+        self.on_session_start = on_session_start
         self.event_listener = event_listener
         self.on_connection_lost = on_connection_lost
 
@@ -57,6 +58,8 @@ class OpenWebNetProtocol(asyncio.Protocol):
 
         elif self.state == 'PASSWORD_SENT':
             if msgs[-1] == messages.ACK:
+                if self.on_session_start:
+                    self.on_session_start.set_result(True)
                 self.state = 'EVENT_SESSION_ACTIVE'
             else:
                 _LOGGER.error('Failed to establish event session')

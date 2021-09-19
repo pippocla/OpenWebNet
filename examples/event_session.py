@@ -36,10 +36,13 @@ async def start_openwebnet(loop, on_event):
     mysock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     mysock.connect(('192.168.0.10', 20000))
     on_con_lost = loop.create_future()
+    on_session_start = loop.create_future()
 
     transport, protocol = await loop.create_connection(
-        lambda: OpenWebNetProtocol(messages.EVENT_SESSION, '951753', on_event, on_con_lost),
+        lambda: OpenWebNetProtocol(messages.EVENT_SESSION, '951753', on_session_start, on_event, on_con_lost),
         sock=mysock)
+
+    await on_session_start
     return transport, protocol, on_con_lost
 
 
