@@ -1,14 +1,9 @@
 # -*- coding: utf-8 -*-
 from pkg_resources import get_distribution, DistributionNotFound
 
-from reopenwebnet import commandclient
-from reopenwebnet import eventclient
-from reopenwebnet import gatewayproxy
-from reopenwebnet import messages
-from reopenwebnet import mqtt
+from reopenwebnet import messages, protocol
 
-__all__=[messages, commandclient, eventclient, gatewayproxy, mqtt]
-
+__all__ = [messages, protocol]
 
 try:
     # Change here if project is renamed and does not equal the package name
