@@ -4,6 +4,9 @@ import asyncio
 from reopenwebnet.config import read_environment_config
 from reopenwebnet.mqtt import MqttBridge
 
+# import logging
+# logging.basicConfig(level=logging.DEBUG)
+
 
 async def main():
     bridge = MqttBridge(read_environment_config())

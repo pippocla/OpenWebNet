@@ -19,16 +19,12 @@ async def main():
     await client.start()
 
     # Play with the lights
-    await light_on(client)
+    while True:
+      await light_on(client)
+      await asyncio.sleep(1)
+      await light_off(client)
+      await asyncio.sleep(40)
 
-    await asyncio.sleep(1)
-    await light_off(client)
-
-    await asyncio.sleep(1)
-    await light_on(client)
-
-    await asyncio.sleep(1)
-    await light_off(client)
 
 
 async def light_off(client):

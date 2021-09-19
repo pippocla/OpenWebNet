@@ -6,10 +6,7 @@ import paho.mqtt.client as mqtt
 from reopenwebnet import messages
 from reopenwebnet.client import OpenWebNetClient
 
-logging.basicConfig(level=logging.DEBUG)
-
 MQTT_LIGHT_COMMAND_PATTERN = re.compile('/openwebnet/1/(\\d+)/cmd')
-
 
 class MqttBridge:
     def __init__(self, config):
@@ -19,8 +16,9 @@ class MqttBridge:
         if config.mqtt is None:
             raise Exception('mqtt configuration required')
 
-        self.event_client = OpenWebNetClient(config.openwebnet.host, config.openwebnet.port, config.openwebnet.password, messages.EVENT_SESSION)
-        self.command_client = OpenWebNetClient(config.openwebnet.host, config.openwebnet.port, config.openwebnet.password, messages.CMD_SESSION)
+        self.config = config
+
+        self.event_client = OpenWebNetClient(config.openwebnet.host, config.openwebnet.port, config.openwebnet.password, messages.EVENT_SESSION, name="eventclient")
         self.mqtt = _create_mqtt_client(config.mqtt)
 
         self.mqtt.on_message = self.send_mqtt_command_to_openwebnet
@@ -32,9 +30,6 @@ class MqttBridge:
         logging.debug('starting event client')
         await self.event_client.start(self.send_openwebnet_event_to_mqtt)
 
-        logging.debug('starting command client')
-        await self.command_client.start(self.send_openwebnet_event_to_mqtt)
-
     def send_mqtt_command_to_openwebnet(self, client, dummy, message):
         logging.debug('received mqtt message: %s / %s', message.topic, message.payload)
         match = MQTT_LIGHT_COMMAND_PATTERN.match(message.topic)
@@ -42,10 +37,18 @@ class MqttBridge:
             what = message.payload.decode('ASCII')
             where = match.group(1)
             try:
-                self.command_client.send_message(messages.NormalMessage(1, what, where))
+                openwebnet_message = messages.NormalMessage(1, what, where)
+                asyncio.run(self.send_openwebnet_message(openwebnet_message))
             except Exception as ex:
                 logging.error("Failed to send message", ex)
 
+    async def send_openwebnet_message(self, message):
+        command_client = OpenWebNetClient(self.config.openwebnet.host, self.config.openwebnet.port,
+                                          self.config.openwebnet.password, messages.CMD_SESSION,
+                                          name="commandclient")
+        await command_client.start(self.send_openwebnet_event_to_mqtt)
+        command_client.send_message(message)
+        command_client.transport.close()
 
     def send_openwebnet_event_to_mqtt(self, msgs):
         logging.debug('openwebnet messages received %s', msgs)
