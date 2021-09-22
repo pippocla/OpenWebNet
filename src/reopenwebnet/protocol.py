@@ -10,10 +10,11 @@ _LOGGER = getLogger(__name__)
 
 
 class OpenWebNetProtocol(asyncio.Protocol):
-    def __init__(self, session_type, password, on_session_start, event_listener, on_connection_lost, name = "opwenwebnet"):
+    def __init__(self, session_type, password, on_session_start, event_listener, on_connection_lost,
+                 name="opwenwebnet"):
         self.session_type = session_type
         self.password = password
-        self.write_delay=0.1
+        self.write_delay = 0.1
         self.on_session_start = on_session_start
         self.event_listener = event_listener
         self.on_connection_lost = on_connection_lost
@@ -84,7 +85,7 @@ class OpenWebNetProtocol(asyncio.Protocol):
         self._send_message(message)
 
     def connection_lost(self, exc):
-        _LOGGER.debug("[%s] in protocol.connection_lost: {}"%(self.name), exc)
+        _LOGGER.debug("[%s] in protocol.connection_lost: %s", self.name, exc)
         self.state = 'NOT_CONNECTED'
         self.transport = None
         self.on_connection_lost.set_result(False)
