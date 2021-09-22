@@ -6,7 +6,7 @@ from reopenwebnet.client import OpenWebNetClient
 
 logging.basicConfig(level=logging.DEBUG)
 
-HOST = '192.168.0.1'
+HOST = '192.168.0.10'
 PORT = 20000
 PASSWORD = '951753'
 LIGHT_WHERE = 13
